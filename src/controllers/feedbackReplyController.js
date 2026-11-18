@@ -2,6 +2,30 @@ import FeedbackLink from '../models/feedbackLink.js';
 import FeedbackReply from '../models/feedbackReply.js';
 import { success, error } from '../utils/responseHandler.js';
 
+// @desc    Get all replies for a feedback link (only the link owner can view them)
+// @route   GET /api/v1/feedback-links/:linkId/replies
+// @access  Private
+export const getRepliesForLink = async (req, res) => {
+    try {
+        const { linkId } = req.params;
+
+        // Verify the link exists and belongs to the logged-in user
+        const link = await FeedbackLink.findOne({ _id: linkId, owner: req.user._id });
+        if (!link) {
+            return error(res, 'Feedback link not found or you are not the owner', 404);
+        }
+
+        // Fetch replies for this link, newest first. Populate the replier when not anonymous.
+        const replies = await FeedbackReply.find({ feedbackLink: linkId })
+            .sort({ createdAt: -1 })
+            .populate('user', 'username email');
+
+        return success(res, replies, 'Feedback link replies fetched successfully');
+    } catch (err) {
+        return error(res, err.message, 500);
+    }
+};
+
 // @desc    Create a reply for a feedback link (only active links are replyable)
 // @route   POST /api/v1/feedback-links/:linkId/replies
 // @access  Public

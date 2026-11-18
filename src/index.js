@@ -1,11 +1,16 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import connectDB from './config/db.js';
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+
+// CORS — allow the React frontend to call this API
+const corsOrigin = process.env.CORS_ORIGIN || '*';
+app.use(cors({ origin: corsOrigin, credentials: true }));
 
 // Connect to DB
 connectDB();

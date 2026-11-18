@@ -7,6 +7,7 @@ import { success, error } from '../utils/responseHandler.js';
 // @access  Public
 export const register = async (req, res) => {
     try {
+        console.log('Registering user with data:', req.body); // Debugging line
         const { username, email, password } = req.body;
 
         if (!username || !email || !password) {
@@ -20,10 +21,11 @@ export const register = async (req, res) => {
 
         user = await User.create({ username, email, password });
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '30d' });
 
         return success(res, { token, user: { id: user._id, username: user.username, email: user.email } }, 'User registered successfully');
     } catch (err) {
+        console.error('Error in register controller:', err); // Debugging line
         return error(res, err.message, 500);
     }
 };
@@ -34,6 +36,7 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log('Logging in user with email:', email); // Debugging line
 
         if (!email || !password) {
             return error(res, 'Please provide email and password', 400);
@@ -49,7 +52,7 @@ export const login = async (req, res) => {
             return error(res, 'Invalid credentials', 401);
         }
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '30d' });
 
         return success(res, { token, user: { id: user._id, username: user.username, email: user.email } }, 'Login successful');
     } catch (err) {
