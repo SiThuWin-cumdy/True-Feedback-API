@@ -108,3 +108,21 @@ export const getLinkById = async (req, res) => {
         return error(res, err.message, 500);
     }
 };
+
+// @desc    Get a single feedback link by slug (public — no token required)
+// @route   GET /api/v1/feedback-links/slug/:slug
+// @access  Public
+export const getLinkBySlug = async (req, res) => {
+    try {
+        const { slug } = req.params;
+
+        const link = await FeedbackLink.findOne({ slug });
+        if (!link) {
+            return error(res, 'Feedback link not found', 404);
+        }
+
+        return success(res, link, 'Feedback link fetched');
+    } catch (err) {
+        return error(res, err.message, 500);
+    }
+};

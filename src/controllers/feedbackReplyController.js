@@ -8,6 +8,8 @@ import { success, error } from '../utils/responseHandler.js';
 export const getRepliesForLink = async (req, res) => {
     try {
         const { linkId } = req.params;
+        const skip = parseInt(req.query.skip, 10) || 0;
+        const limit = parseInt(req.query.limit, 10) || 10;
 
         // Verify the link exists and belongs to the logged-in user
         const link = await FeedbackLink.findOne({ _id: linkId, owner: req.user._id });
@@ -15,12 +17,17 @@ export const getRepliesForLink = async (req, res) => {
             return error(res, 'Feedback link not found or you are not the owner', 404);
         }
 
-        // Fetch replies for this link, newest first. Populate the replier when not anonymous.
+        // Total count of replies for this link
+        const totalCount = await FeedbackReply.countDocuments({ feedbackLink: linkId });
+
+        // Fetch paginated replies for this link, newest first
         const replies = await FeedbackReply.find({ feedbackLink: linkId })
             .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
             .populate('user', 'username email');
 
-        return success(res, replies, 'Feedback link replies fetched successfully');
+        return success(res, { replies, totalCount }, 'Feedback link replies fetched successfully');
     } catch (err) {
         return error(res, err.message, 500);
     }
