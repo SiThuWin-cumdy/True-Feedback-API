@@ -19,9 +19,10 @@ app.use('/api/v1/health', (await import('./routes/health.js')).default);
 app.use('/api/v1/auth', (await import('./routes/auth.js')).default);
 app.use('/api/v1/feedback-links', (await import('./routes/feedbackLink.js')).default);
 app.use('/api/v1/feedback-links/:linkId', (await import('./routes/feedbackReply.js')).default);
+app.use('/api/v1/feedback-suggestions', (await import('./routes/feedbackSuggestion.js')).default);
 app.use((await import('./middleware/notFound.js')).default);
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 app.listen(port, () => {
   console.log(`truefeedback-api listening on port ${port}`);
